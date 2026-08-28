@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+<<<<<<< Updated upstream
   <component name="AutoImportSettings">
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
+=======
+>>>>>>> Stashed changes
   <component name="ChangeListManager">
     <list default="true" id="8e5fd7de-831b-4a31-bba7-0057890e9634" name="Changes" comment="">
       <change afterPath="$PROJECT_DIR$/hello world.py" afterDir="false" />
