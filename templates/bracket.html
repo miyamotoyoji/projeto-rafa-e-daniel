@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import heading, empty with context %}
+{% block title %}Mata-mata{% endblock %}
+{% block content %}
+{{ heading('04 / ELIMINATÓRIAS', 'Até a final', 'Quem vence avança. Uma dupla leva o campeonato.') }}
+{% if not s or s.phase == 'registration' %}
+  {{ empty('A chave ainda não foi definida', 'As duas melhores duplas de cada grupo garantem uma vaga nas eliminatórias.') }}
+{% else %}
+  {% if s.phase == 'groups' %}<p class="scoring-note">Aguardando o encerramento dos grupos. As posições abaixo mostram os cruzamentos previstos.</p>{% endif %}
+  {% set labels = ['Quartas de final','Semifinais','Final'] if s.capacity == 16 else ['Semifinais','Final'] %}
+  {% set slots = ['1º A × 2º B','1º C × 2º D','1º B × 2º A','1º D × 2º C'] if s.capacity == 16 else ['1º A × 2º B','1º B × 2º A'] %}
+  <div class="bracket-scroll" role="region" aria-label="Chaveamento. Role horizontalmente para ver as rodadas." tabindex="0">
+  <div class="bracket-grid rounds-{{ labels|length }}">
+    {% for label in labels %}
+    {% set rn = loop.index %}
+    <section class="bracket-round">
+      <h2>{{ label }}</h2>
+      <div class="bracket-matches">
+      {% set matches = s.matches|selectattr('round','equalto',rn)|list %}
+      {% set total = (s.capacity // 4) // (2 ** (rn - 1)) %}
+      {% for i in range(total) %}
+        {% set m = matches[i] if i < matches|length else none %}
+        <article class="bracket-match">
+          <div class="bracket-match-label">{% if m %}J{{ '%02d'|format(m.id) }} · {{ 'A jogar' if m.score_a is none else 'Encerrada' }}{% elif rn == 1 %}{{ slots[i] }}{% else %}Vencedores da rodada anterior{% endif %}</div>
+          {% for side in ['a','b'] %}
+          {% set score = m['score_' + side] if m else none %}
+          {% set other = m['score_b' if side == 'a' else 'score_a'] if m else none %}
+          <div class="bracket-team {% if score is not none and score > other %}winner{% endif %}">
+            <div><strong>{{ team_name(s,m[side]) if m else 'A definir' }}</strong><small>{{ team_members(s,m[side]) if m else 'Aguardando classificação' }}</small>
+            {% if score is not none and score > other %}<small class="won-label">Vitória</small>{% endif %}</div>
+            <b>{{ score if score is not none else '—' }}</b>
+          </div>
+          {% endfor %}
+        </article>
+      {% endfor %}
+      </div>
+    </section>
+    {% endfor %}
+  </div>
+  </div>
+  {% if s.champion %}
+    <section class="champion-banner"><div><p class="eyebrow">CAMPEÕES DO CAMPEONATO</p><h2>{{ team_name(s,s.champion) }}</h2><p>{{ team_members(s,s.champion) }}</p></div><span class="champion-mark">1º</span></section>
+  {% else %}
+    <p class="footnote">O organizador confirma cada rodada antes de liberar a próxima. Duplas do mesmo grupo ficam em lados opostos da chave.</p>
+  {% endif %}
+{% endif %}
+{% endblock %}
+

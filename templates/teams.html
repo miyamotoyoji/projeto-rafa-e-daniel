@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import heading, empty with context %}
+{% block title %}Duplas{% endblock %}
+{% block content %}
+{{ heading('02 / PARCEIROS', 'As duplas', 'Parceiros fixos. Do primeiro confronto à última rodada.') }}
+{% if not s or not s.teams %}
+  {{ empty('O sorteio ainda não aconteceu', 'Quando todas as vagas estiverem preenchidas, o organizador poderá sortear os parceiros e os grupos.') }}
+  <a class="text-link" href="{{ url_for('signup') }}">Acompanhar inscrições</a>
+{% else %}
+  <div class="team-grid">
+  {% for team in s.teams %}
+    <article class="team-block">
+      <header><span class="team-number">{{ '%02d'|format(team.id) }}</span><div><h2>{{ team.name }}</h2>
+      {% for g in s.groups %}{% if team.id in g.teams %}<span class="eyebrow">GRUPO {{ g.name }}</span>{% endif %}{% endfor %}</div></header>
+      <ul>{% for p in team.players %}<li><strong>{{ p.name }}</strong><span>{{ p.rank }}</span></li>{% endfor %}</ul>
+    </article>
+  {% endfor %}
+  </div>
+  <p class="footnote">Equilíbrio baseado no rank informado: níveis mais altos são combinados com níveis mais baixos. Jogadores do mesmo nível têm a ordem sorteada. O rank é uma aproximação de habilidade.</p>
+{% endif %}
+{% endblock %}
+

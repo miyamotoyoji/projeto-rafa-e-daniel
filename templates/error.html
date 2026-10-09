@@ -1,0 +1,6 @@
+{% extends 'base.html' %}
+{% block title %}{{ code }}{% endblock %}
+{% block content %}
+<section class="error-page"><p class="eyebrow">ERRO {{ code }}</p><h1>Não foi possível continuar.</h1><p class="lead">{{ message }}</p><a class="button button-outline" href="{{ url_for('home') }}">Voltar ao campeonato</a></section>
+{% endblock %}
+

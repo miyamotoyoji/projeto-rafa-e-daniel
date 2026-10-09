@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import heading, empty, match_row with context %}
+{% block title %}{{ s.name if s else 'Campeonato' }}{% endblock %}
+{% block content %}
+<section class="championship-heading">
+  <div>
+    <p class="eyebrow">VALORANT / COMPETIÇÃO AMADORA</p>
+    <h1>{{ s.name if s else 'O próximo campeonato' }}</h1>
+  </div>
+  <div class="edition-meta">
+    <span class="phase-label">{{ phases[s.phase] if s else 'Aguardando abertura' }}</span>
+    <span>Duplas fixas · Grupos + mata-mata</span>
+    {% if s %}<span>{{ s.capacity }} duplas / {{ s.capacity * 2 }} jogadores</span>{% endif %}
+  </div>
+</section>
+
+{% if s and s.phase == 'finished' %}
+<section class="champion-banner">
+  <div><p class="eyebrow">CAMPEÕES</p><h2>{{ team_name(s, s.champion) }}</h2><p>{{ team_members(s, s.champion) }}</p></div>
+  <a class="button button-light" href="{{ url_for('bracket') }}">Ver a final</a>
+</section>
+{% endif %}
+
+<div class="workspace-grid">
+  <section class="primary-panel">
+    <div class="section-heading"><h2>{% if s and s.phase in ['groups','knockout','finished'] %}Partidas{% else %}Inscrições{% endif %}</h2><span class="section-index">01</span></div>
+    {% if not s %}
+      {{ empty('Nenhum campeonato aberto', 'O organizador precisa definir o nome e a quantidade de duplas para abrir as inscrições.', '00') }}
+      <a class="text-link" href="{{ url_for('admin') }}">Área do organizador</a>
+    {% elif s.phase == 'registration' %}
+      <div class="registration-count"><strong>{{ '%02d'|format(s.players|length) }}</strong><div><span>de {{ s.capacity * 2 }} jogadores</span><p>{{ s.capacity * 2 - s.players|length }} vagas disponíveis</p></div></div>
+      <progress class="capacity-progress" value="{{ s.players|length }}" max="{{ s.capacity * 2 }}" aria-label="Vagas preenchidas">{{ s.players|length }}</progress>
+      {% if s.players %}
+      <ul class="player-list">
+        {% for p in s.players[-6:]|reverse %}<li><span class="list-number">{{ '%02d'|format(p.id) }}</span><strong>{{ p.name }}</strong><span class="rank-text">{{ p.rank }}</span></li>{% endfor %}
+      </ul>
+      <a class="text-link" href="{{ url_for('signup') }}">Ver todas as inscrições</a>
+      {% else %}
+      <p class="quiet-space">Ainda não há jogadores inscritos. A primeira dupla começa com vocês.</p>
+      {% endif %}
+    {% else %}
+      {% set upcoming = s.matches|selectattr('score_a', 'none')|list %}
+      {% set completed = s.matches|rejectattr('score_a', 'none')|list %}
+      {% if upcoming %}
+        <p class="section-note">Próximos confrontos · aguardando placar</p>
+        {% for m in upcoming[:4] %}{{ match_row(s, m) }}{% endfor %}
+      {% endif %}
+      {% if completed %}
+        <p class="section-note">Resultados</p>
+        {% for m in completed[-3:]|reverse %}{{ match_row(s, m) }}{% endfor %}
+      {% endif %}
+      <a class="text-link" href="{{ url_for('groups' if s.phase == 'groups' else 'bracket') }}">Ver todos os confrontos</a>
+    {% endif %}
+  </section>
+
+  <aside class="side-panel">
+    <p class="eyebrow">COMO PARTICIPAR</p>
+    <h2>Você entra.<br>A dupla é sorteada.</h2>
+    <p>Informe seu nome, Riot ID e rank. Os parceiros serão definidos quando todas as vagas estiverem preenchidas.</p>
+    {% if s and s.phase == 'registration' and s.players|length < s.capacity * 2 %}
+      <a class="button" href="{{ url_for('signup') }}">Fazer minha inscrição</a>
+    {% elif s and s.phase != 'registration' %}
+      <a class="button button-outline" href="{{ url_for('teams') }}">Encontrar minha dupla</a>
+    {% elif s %}
+      <p class="inline-status">Vagas preenchidas. Aguardando sorteio.</p>
+    {% else %}
+      <p class="inline-status">Inscrições ainda não abertas.</p>
+    {% endif %}
+    <dl class="rules-summary"><div><dt>Formato</dt><dd>2 contra 2 · sala personalizada</dd></div><div><dt>Duplas</dt><dd>Fixas até o fim do campeonato</dd></div><div><dt>Classificação</dt><dd>2 melhores de cada grupo</dd></div></dl>
+  </aside>
+</div>
+<section class="format-strip" aria-label="Etapas do campeonato">
+  <div><span>01 / INSCRIÇÃO</span><p>Entre com seu Riot ID.</p></div>
+  <div><span>02 / SORTEIO</span><p>Conheça seu parceiro e seu grupo.</p></div>
+  <div><span>03 / CAMPEONATO</span><p>Dispute os grupos e avance à final.</p></div>
+</section>
+{% endblock %}

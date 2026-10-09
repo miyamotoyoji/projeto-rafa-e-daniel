@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import heading, csrf with context %}
+{% block title %}Organização{% endblock %}
+{% block content %}
+<div class="admin-heading">
+{{ heading('CONTROLE DO CAMPEONATO', 'Organização', s.name if s else 'Crie o campeonato para abrir as inscrições.') }}
+<form method="post" action="{{ url_for('logout') }}">{{ csrf() }}<button class="button button-outline button-small">Sair</button></form>
+</div>
+{% if not s %}
+<form class="entry-form" method="post" action="{{ url_for('admin_action') }}">
+  {{ csrf() }}<input type="hidden" name="action" value="create">
+  <label for="championship-name">Nome do campeonato</label><input id="championship-name" name="name" minlength="3" maxlength="70" required placeholder="Nome escolhido pela comunidade">
+  <fieldset><legend>Quantidade de duplas</legend><div class="radio-options">
+    <label><input type="radio" name="capacity" value="8" checked> 8 duplas <span>16 jogadores · 2 grupos</span></label>
+    <label><input type="radio" name="capacity" value="16"> 16 duplas <span>32 jogadores · 4 grupos</span></label>
+  </div></fieldset>
+  <button class="button">Criar e abrir inscrições</button>
+</form>
+{% else %}
+<div class="admin-status"><span class="phase-label">{{ phases[s.phase] }}</span><span>{{ s.players|length }} / {{ s.capacity * 2 }} jogadores</span><a class="text-link" href="{{ url_for('home') }}">Ver página pública</a></div>
+{% if s.phase == 'registration' %}
+<div class="workspace-grid">
+<section>
+  <div class="section-heading"><h2>Inscrições recebidas</h2><span>{{ s.players|length }}</span></div>
+  {% if not s.players %}<p class="quiet-space">Nenhuma inscrição recebida. Compartilhe a página de inscrição com os jogadores.</p>{% endif %}
+  <ul class="admin-player-list">
+    {% for p in s.players %}<li><div><strong>{{ p.name }}</strong><span>{{ p.riot_id }} · {{ p.rank }}</span></div>
+    <form method="post" action="{{ url_for('admin_action') }}" data-confirm="Remover esta inscrição? A vaga ficará disponível novamente.">{{ csrf() }}<input type="hidden" name="action" value="remove"><input type="hidden" name="player_id" value="{{ p.id }}"><button class="remove-button" aria-label="Remover inscrição de {{ p.name }}">Remover</button></form></li>{% endfor %}
+  </ul>
+</section>
+<aside class="side-panel"><p class="eyebrow">FECHAR INSCRIÇÕES</p><h2>Sortear duplas<br>e grupos.</h2>
+<p>O sorteio combina níveis altos e baixos. Os parceiros ficam juntos até o fim, e cada grupo recebe quatro duplas.</p>
+<form method="post" action="{{ url_for('admin_action') }}" data-confirm="Confirmar o sorteio? As inscrições serão encerradas e as duplas ficarão fixas.">
+{{ csrf() }}<input type="hidden" name="action" value="draw"><button class="button" {% if s.players|length != s.capacity * 2 %}disabled{% endif %}>Realizar sorteio</button>
+</form><p class="field-help">{% if s.players|length != s.capacity * 2 %}Faltam {{ s.capacity * 2 - s.players|length }} inscrições para liberar o sorteio.{% else %}Todas as vagas estão preenchidas. Confira os dados antes de sortear.{% endif %}</p></aside>
+</div>
+{% elif s.phase in ['groups','knockout'] %}
+<section id="partidas">
+<div class="section-heading"><h2>Lançar resultados</h2><span>{{ 'GRUPOS' if s.phase == 'groups' else 'RODADA ' ~ s.round }}</span></div>
+<p class="scoring-note">Informe o total de rounds de cada dupla, sem empate. Você pode corrigir o placar até encerrar esta fase.</p>
+<div class="score-editor-list">
+{% for m in s.matches if (s.phase == 'groups' and m.group) or (s.phase == 'knockout' and m.round == s.round) %}
+<form method="post" action="{{ url_for('admin_action') }}" class="score-editor">
+  {{ csrf() }}<input type="hidden" name="action" value="score"><input type="hidden" name="match_id" value="{{ m.id }}">
+  <div class="editor-meta"><span>J{{ '%02d'|format(m.id) }}</span><strong>{{ 'Grupo ' ~ m.group if m.group else 'Mata-mata' }}</strong><small>{{ 'A jogar' if m.score_a is none else 'Placar salvo' }}</small></div>
+  <label for="a-{{ m.id }}">{{ team_name(s,m.a) }}<small>{{ team_members(s,m.a) }}</small></label>
+  <div class="score-inputs"><input id="a-{{ m.id }}" name="score_a" type="number" inputmode="numeric" min="0" max="99" required value="{{ m.score_a if m.score_a is not none else '' }}"><span>:</span><input id="b-{{ m.id }}" name="score_b" type="number" inputmode="numeric" min="0" max="99" required value="{{ m.score_b if m.score_b is not none else '' }}"></div>
+  <label for="b-{{ m.id }}">{{ team_name(s,m.b) }}<small>{{ team_members(s,m.b) }}</small></label>
+  <button class="button button-outline button-small">{{ 'Salvar' if m.score_a is none else 'Atualizar' }}</button>
+</form>
+{% endfor %}
+</div>
+</section>
+{% set pending = s.matches|selectattr('score_a','none')|list %}
+<section class="advance-panel"><div><h2>{% if s.phase == 'groups' %}Encerrar grupos{% elif s.matches|selectattr('round','equalto',s.round)|list|length == 1 %}Confirmar campeões{% else %}Avançar rodada{% endif %}</h2><p>{% if pending %}Faltam {{ pending|length }} placares nesta fase.{% else %}Todos os resultados foram salvos. Confira antes de continuar.{% endif %}</p><p class="field-help">Ao avançar, os placares desta fase ficam bloqueados.</p></div>
+<form method="post" action="{{ url_for('admin_action') }}" data-confirm="Encerrar esta fase? Os placares atuais serão bloqueados e os vencedores avançarão.">{{ csrf() }}<input type="hidden" name="action" value="advance"><button class="button" {% if pending %}disabled{% endif %}>Confirmar e avançar</button></form></section>
+{% else %}
+<section class="champion-banner"><div><p class="eyebrow">CAMPEONATO ENCERRADO</p><h2>{{ team_name(s,s.champion) }}</h2><p>{{ team_members(s,s.champion) }}</p></div><a class="button button-light" href="{{ url_for('bracket') }}">Ver resultado final</a></section>
+{% endif %}
+{% endif %}
+{% endblock %}
+

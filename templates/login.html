@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import heading, csrf with context %}
+{% block title %}Organização{% endblock %}
+{% block content %}
+{{ heading('ÁREA RESTRITA', 'Organização', 'Acesso para gerenciar inscrições, sorteio e resultados.') }}
+<div class="workspace-grid">
+<form method="post" class="entry-form" data-pending="Entrando…">
+  {{ csrf() }}
+  {% if error %}<div class="notice error" role="alert">{{ error }}</div>{% endif %}
+  <label for="username">Usuário</label><input id="username" name="username" required maxlength="40" autocomplete="username">
+  <label for="password">Senha</label><input id="password" type="password" name="password" required maxlength="1024" autocomplete="current-password">
+  <button class="button" type="submit">Entrar</button>
+</form>
+<aside class="side-panel"><p class="eyebrow">VAI JOGAR?</p><h2>Sua inscrição<br>não pede senha.</h2><p>Este acesso é exclusivo do organizador. Os jogadores se inscrevem com nome, Riot ID e rank.</p><a class="text-link" href="{{ url_for('signup') }}">Ir para inscrição</a></aside>
+</div>
+{% endblock %}
+

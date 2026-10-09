@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import heading, empty, match_row with context %}
+{% block title %}Grupos{% endblock %}
+{% block content %}
+{{ heading('03 / CLASSIFICAÇÃO', 'Fase de grupos', 'Todos contra todos dentro do grupo. Duas duplas avançam.') }}
+{% if not s or not s.groups %}
+  {{ empty('Grupos aguardando o sorteio', 'As tabelas e os confrontos serão publicados junto com as duplas.') }}
+{% else %}
+  <p class="scoring-note">Vitória: 3 pontos · Derrota: 0 pontos · Desempate: saldo de rounds, rounds vencidos e ordem sorteada.</p>
+  <div class="groups-grid">
+  {% for group, rows in tables %}
+    <section class="group-section">
+      <div class="section-heading"><h2>Grupo {{ group.name }}</h2><span>4 DUPLAS</span></div>
+      <div class="table-scroll" role="region" aria-label="Classificação do grupo {{ group.name }}" tabindex="0">
+        <table><caption class="sr-only">Classificação do grupo {{ group.name }}</caption>
+          <thead><tr><th scope="col">Dupla</th><th scope="col"><abbr title="Pontos">PTS</abbr></th><th scope="col"><abbr title="Jogos">J</abbr></th><th scope="col"><abbr title="Vitórias">V</abbr></th><th scope="col"><abbr title="Derrotas">D</abbr></th><th scope="col"><abbr title="Saldo de rounds">SR</abbr></th><th scope="col"><abbr title="Rounds vencidos">RV</abbr></th></tr></thead>
+          <tbody>{% for row in rows %}
+            <tr {% if loop.index <= 2 %}class="qualifying"{% endif %}>
+              <th scope="row"><span class="position">{{ loop.index }}</span><span>{{ team_name(s, row.team) }}<small>{{ team_members(s, row.team) }}</small>{% if loop.index <= 2 %}<small class="qualification">{{ 'Na zona de classificação' if s.phase == 'groups' else 'Classificada' }}</small>{% endif %}</span></th>
+              <td class="points">{{ row.points }}</td><td>{{ row.played }}</td><td>{{ row.wins }}</td><td>{{ row.losses }}</td><td>{{ '+' if row.diff > 0 else '' }}{{ row.diff }}</td><td>{{ row['for'] }}</td>
+            </tr>
+          {% endfor %}</tbody>
+        </table>
+      </div>
+      <details class="group-matches"><summary>Confrontos do grupo {{ group.name }}</summary>
+        {% for m in s.matches if m.group == group.name %}{{ match_row(s, m) }}{% endfor %}
+      </details>
+    </section>
+  {% endfor %}
+  </div>
+  <p class="footnote">A classificação é provisória até o organizador encerrar a fase. O último desempate usa a ordem definida no sorteio, sem alterar a tabela a cada atualização.</p>
+{% endif %}
+{% endblock %}
+

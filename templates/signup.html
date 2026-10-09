@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import heading, empty, csrf with context %}
+{% block title %}Inscrição{% endblock %}
+{% block content %}
+{{ heading('01 / PARTICIPAR', 'Entre no campeonato', 'Sem criar conta. Sua dupla será definida no sorteio.') }}
+<div class="workspace-grid">
+<section>
+{% if s and s.phase == 'registration' and s.players|length < s.capacity * 2 %}
+  <form method="post" class="entry-form" data-pending="Enviando inscrição…">
+    {{ csrf() }}
+    {% if error %}<div class="notice error" role="alert">{{ error }}</div>{% endif %}
+    <label for="name">Seu nome</label><input id="name" name="name" value="{{ values.get('name','') }}" minlength="2" maxlength="40" required autocomplete="name" placeholder="Como você quer ser chamado">
+    <label for="riot_id">Riot ID</label><input id="riot_id" name="riot_id" value="{{ values.get('riot_id','') }}" minlength="7" maxlength="22" required spellcheck="false" aria-describedby="riot-help" placeholder="SeuNome#BR1">
+    <p id="riot-help" class="field-help">Inclua o nome e a tag que aparecem no jogo.</p>
+    <label for="rank">Seu rank atual</label>
+    <select id="rank" name="rank" required aria-describedby="rank-help">
+      <option value="">Selecione seu rank</option>
+      {% for rank in ranks %}<option value="{{ rank }}" {% if values.get('rank') == rank %}selected{% endif %}>{{ rank }}</option>{% endfor %}
+    </select>
+    <p id="rank-help" class="field-help">O rank é autodeclarado e será usado para equilibrar as duplas. Se você ainda não tem rank, combine com o organizador qual nível informar.</p>
+    <p class="form-disclosure">Seu nome e rank aparecerão na lista pública. Seu Riot ID será exibido apenas ao organizador. Não há conexão com sua conta Riot.</p>
+    <button class="button" type="submit">Confirmar inscrição</button>
+  </form>
+{% elif not s %}
+  {{ empty('Inscrições em breve', 'O organizador ainda não abriu um campeonato.') }}
+{% elif s.phase == 'registration' %}
+  {{ empty('Todas as vagas preenchidas', 'As inscrições estão completas. Acompanhe a publicação das duplas.') }}
+{% else %}
+  {{ empty('Inscrições encerradas', 'As duplas já foram sorteadas. Consulte seu parceiro e acompanhe os confrontos.') }}
+  <a class="button button-outline" href="{{ url_for('teams') }}">Ver duplas</a>
+{% endif %}
+</section>
+<aside class="side-panel">
+  <p class="eyebrow">ANTES DE ENTRAR</p><h2>Um jogador.<br>Uma inscrição.</h2>
+  <p>Use seu próprio Riot ID e informe seu nível atual. O organizador pode remover inscrições incorretas antes do sorteio.</p>
+  {% if s %}<p class="vacancies"><strong>{{ s.players|length }}</strong> / {{ s.capacity * 2 }} inscritos</p>{% endif %}
+  <p class="field-help">Não precisa escolher parceiro. O sorteio combina níveis mais altos e mais baixos para aproximar a força das duplas.</p>
+</aside>
+</div>
+{% if s and s.players %}
+<section class="registered-section">
+  <div class="section-heading"><h2>Jogadores inscritos</h2><span>{{ s.players|length }} jogadores</span></div>
+  <ul class="player-list player-list-columns">
+  {% for p in s.players %}<li><span class="list-number">{{ '%02d'|format(loop.index) }}</span><strong>{{ p.name }}</strong><span class="rank-text">{{ p.rank }}</span></li>{% endfor %}
+  </ul>
+</section>
+{% endif %}
+{% endblock %}
+

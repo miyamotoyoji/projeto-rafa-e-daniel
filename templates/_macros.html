@@ -1,0 +1,37 @@
+{% macro csrf() -%}
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+{%- endmacro %}
+
+{% macro heading(kicker, title, subtitle='') %}
+<header class="page-heading">
+  <p class="eyebrow">{{ kicker }}</p>
+  <h1>{{ title }}</h1>
+  {% if subtitle %}<p class="lead">{{ subtitle }}</p>{% endif %}
+</header>
+{% endmacro %}
+
+{% macro empty(title, body, number='—') %}
+<div class="empty-state">
+  <span class="empty-number" aria-hidden="true">{{ number }}</span>
+  <div><h2>{{ title }}</h2><p>{{ body }}</p></div>
+</div>
+{% endmacro %}
+
+{% macro match_row(s, m) %}
+<article class="match-row">
+  <div class="match-meta"><span>J{{ '%02d'|format(m.id) }}</span><span>{% if m.group %}Grupo {{ m.group }}{% else %}Mata-mata{% endif %}</span></div>
+  <div class="opponent {% if m.score_a is not none and m.score_a > m.score_b %}winner{% endif %}">
+    <strong>{{ team_name(s, m.a) }}</strong><span>{{ team_members(s, m.a) }}</span>
+    {% if m.score_a is not none and m.score_a > m.score_b %}<small>Vitória</small>{% endif %}
+  </div>
+  <div class="scoreline" aria-label="{% if m.score_a is none %}Placar ainda não informado{% else %}Placar {{ m.score_a }} a {{ m.score_b }}{% endif %}">
+    <b>{{ m.score_a if m.score_a is not none else '—' }}</b><span>:</span><b>{{ m.score_b if m.score_b is not none else '—' }}</b>
+    <small>{{ 'A jogar' if m.score_a is none else 'Encerrada' }}</small>
+  </div>
+  <div class="opponent opponent-right {% if m.score_b is not none and m.score_b > m.score_a %}winner{% endif %}">
+    <strong>{{ team_name(s, m.b) }}</strong><span>{{ team_members(s, m.b) }}</span>
+    {% if m.score_b is not none and m.score_b > m.score_a %}<small>Vitória</small>{% endif %}
+  </div>
+</article>
+{% endmacro %}
+
