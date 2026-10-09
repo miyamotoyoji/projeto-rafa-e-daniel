@@ -19,11 +19,15 @@ Fonte: `ProjetoFinal_ModelagemDeSoftware_2026-2.pdf`, seis páginas, fornecido p
 | §7 — Estratégia e evidências de testes | docs/TESTES.md, testes e CI | Evidências reais; lacunas específicas documentadas |
 | §9.1 — docs, src ou equivalente, tests e .specify | docs/, tests/, .specify/; módulos Python na raiz equivalem a src | Estrutura documentada; não há obrigação de renomear a raiz |
 | §9.2 — Issues com responsável, prioridade e aceite | Issue #3 registra esta preparação | Adotado para a entrega atual; não corrige ausência histórica |
-| §9.2 — Project/Kanban com quatro estados | A fazer, Em andamento, Em revisão, Concluído | Configuração e manutenção precisam ser verificadas no GitHub; lista Markdown não substitui Project |
+| §9.2 — Project/Kanban com quatro estados | A fazer, Em andamento, Em revisão, Concluído | Quadro criado na conta de Rafael, issue #3 em revisão; manutenção semanal e acesso de edição de Daniel pendentes |
 | §§9.2, 9.5 — Distribuição equilibrada e progresso semanal | Proposta em plan.md; D11–D12 | Pendente de confirmação e trabalho real dos dois |
 | §9.3 — Branch, PR e revisão por colega | Branch codex/adequacao-modelagem; PR vinculado à issue #3 | Entrega preparada para revisão; não integrar antes da revisão humana |
 | §9.4 — Referências issue/commit/PR e agente | Issue #3, IDs em tasks.md e .specify/README.md | A partir desta adequação; MCP é opcional no enunciado |
 | §§10–11 — Coerência e produto funcional | Matriz em docs/TESTES.md, ADRs e app | Revisão final da equipe e avaliação do professor ainda necessárias |
+
+## Kanban
+
+[DOIS — Projeto Final de Modelagem](https://github.com/users/rcosta2702/projects/1) é um Project público na conta de Rafael, com os quatro estados e a issue #3 em revisão. O seletor de vínculo na aba Projects do repositório de miyamotoyoji não ofereceu esse quadro de outra conta; o acesso é pelo link. Daniel pode consultar o quadro público; seu acesso de edição ainda precisa ser configurado. Não houve convite enviado em nome de Rafael.
 
 ## O que não pode ser fabricado
 

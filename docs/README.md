@@ -22,6 +22,10 @@ Projeto final de Modelagem de Software, semestre 2026-2, turma 04G. Tema: organi
 - [Roteiro de apresentação](APRESENTACAO.md).
 - [Orientações ao agente](../.specify/README.md).
 
+## Acompanhamento
+
+[Kanban do DOIS](https://github.com/users/rcosta2702/projects/1): A fazer, Em andamento, Em revisão e Concluído. Mantido na conta de Rafael; a issue #3 está em revisão.
+
 ## Processo e autoria
 
 A [issue #3](https://github.com/miyamotoyoji/projeto-rafa-e-daniel/issues/3) registra esta adequação. O código anterior foi preparado com apoio de agente e enviado em commits diretos; a documentação atual não inventa um fluxo de revisão retroativo. A participação individual de Rafael e Daniel, o uso contínuo de Kanban e a revisão humana precisam de evidências reais.
