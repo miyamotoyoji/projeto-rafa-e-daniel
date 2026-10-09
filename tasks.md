@@ -54,4 +54,6 @@ Abrir uma issue individual antes de iniciar cada item abaixo, com responsável c
 
 ## Convenção de fluxo
 
+[Project do DOIS](https://github.com/users/rcosta2702/projects/1), criado na conta de Rafael. A issue #3 está em revisão. Acesso de edição de Daniel e manutenção semanal continuam pendentes.
+
 A fazer → Em andamento → Em revisão → Concluído. Concluído exige aceite, evidência e revisão humana quando houver PR. Usar IDs das tarefas e requisitos na descrição da issue/PR; não alterar datas nem criar commits em nome do colega. A lista não inventa conclusão de tarefas futuras nem participação anterior.

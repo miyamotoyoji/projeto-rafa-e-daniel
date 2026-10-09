@@ -12,6 +12,7 @@ Trabalho de Modelagem de Software, 2026-2, turma 04G, de Rafael e Daniel.
 - [plan.md](plan.md): arquitetura, dados, etapas e proposta de divisão do trabalho.
 - [tasks.md](tasks.md): tarefas atômicas e evidências, separadas de pendências.
 - [Pasta de documentação](docs/README.md): ADRs, revisão, segurança, testes e apresentação.
+- [Kanban no GitHub](https://github.com/users/rcosta2702/projects/1): acompanhamento das issues e revisões.
 - [Conformidade com o enunciado](docs/CONFORMIDADE.md): o que está atendido e o que ainda depende da equipe.
 
 A adequação documental está na [issue #3](https://github.com/miyamotoyoji/projeto-rafa-e-daniel/issues/3). Novas entregas seguem issue, branch, PR e revisão de outro integrante. O histórico anterior de commits diretos foi preservado. Uso de agente não substitui participação ou revisão humana.
