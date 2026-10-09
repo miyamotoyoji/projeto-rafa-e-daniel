@@ -6,10 +6,15 @@ A interface usa tipografia condensada, fundo escuro, divisórias e vermelho pont
 
 ## Documentação do projeto
 
-- [SPECS.md](SPECS.md): escopo, requisitos, critérios de aceite, regras, telas e arquitetura.
-- [TASKS.md](TASKS.md): entregas concluídas, pendências da apresentação e melhorias futuras.
-- [Roteiro de apresentação](docs/APRESENTACAO.md): sequência sugerida para demonstrar e explicar o projeto.
-- [Validação](docs/VALIDACAO.md): verificações realizadas e seus limites.
+Trabalho de Modelagem de Software, 2026-2, turma 04G, de Rafael e Daniel.
+
+- [spec.md](spec.md): fonte de verdade com requisitos EARS, personas, regras, backlog, casos de uso e domínio.
+- [plan.md](plan.md): arquitetura, dados, etapas e proposta de divisão do trabalho.
+- [tasks.md](tasks.md): tarefas atômicas e evidências, separadas de pendências.
+- [Pasta de documentação](docs/README.md): ADRs, revisão, segurança, testes e apresentação.
+- [Conformidade com o enunciado](docs/CONFORMIDADE.md): o que está atendido e o que ainda depende da equipe.
+
+A adequação documental está na [issue #3](https://github.com/miyamotoyoji/projeto-rafa-e-daniel/issues/3). Novas entregas seguem issue, branch, PR e revisão de outro integrante. O histórico anterior de commits diretos foi preservado. Uso de agente não substitui participação ou revisão humana.
 
 Este README reúne as instruções de instalação, uso e manutenção.
 
