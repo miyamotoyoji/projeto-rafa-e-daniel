@@ -4,6 +4,15 @@ Site de campeonatos amadores de **Valorant 2 contra 2**, feito com Python, Flask
 
 A interface usa tipografia condensada, fundo escuro, divisórias e vermelho pontual. Não depende de bibliotecas de interface, fontes externas, imagens de terceiros ou serviços da Riot.
 
+## Documentação do projeto
+
+- [SPECS.md](SPECS.md): escopo, requisitos, critérios de aceite, regras, telas e arquitetura.
+- [TASKS.md](TASKS.md): entregas concluídas, pendências da apresentação e melhorias futuras.
+- [Roteiro de apresentação](docs/APRESENTACAO.md): sequência sugerida para demonstrar e explicar o projeto.
+- [Validação](docs/VALIDACAO.md): verificações realizadas e seus limites.
+
+Este README reúne as instruções de instalação, uso e manutenção.
+
 ## Começar
 
 Requisito: **Python 3.11 ou superior**, com pip e venv. A instalação inicial das dependências precisa de internet.
