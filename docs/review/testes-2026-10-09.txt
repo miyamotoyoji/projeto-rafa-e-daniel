@@ -1,0 +1,25 @@
+test_admin_command (test_app.AppTests.test_admin_command) ... ok
+test_all_empty_pages_render (test_app.AppTests.test_all_empty_pages_render) ... ok
+test_complete_http_journey (test_app.AppTests.test_complete_http_journey) ... ok
+test_csrf_and_organizer_permission (test_app.AppTests.test_csrf_and_organizer_permission) ... ok
+test_html_escaping (test_app.AppTests.test_html_escaping) ... ok
+test_login_rate_limit_and_logout (test_app.AppTests.test_login_rate_limit_and_logout) ... ok
+test_password_change_invalidates_session (test_app.AppTests.test_password_change_invalidates_session) ... ok
+test_persistence_and_atomic_last_slot (test_app.AppTests.test_persistence_and_atomic_last_slot) ... ok
+test_registration_and_privacy (test_app.AppTests.test_registration_and_privacy) ... ok
+test_wrong_action_preserves_data (test_app.AppTests.test_wrong_action_preserves_data) ... ok
+test_balanced_pairs_and_groups (test_tournament.TournamentTests.test_balanced_pairs_and_groups) ... ok
+test_capacity_and_incomplete_draw (test_tournament.TournamentTests.test_capacity_and_incomplete_draw) ... ok
+test_corrections_recalculate_standings (test_tournament.TournamentTests.test_corrections_recalculate_standings) ... ok
+test_draw_is_locked_and_signup_closes (test_tournament.TournamentTests.test_draw_is_locked_and_signup_closes) ... ok
+test_full_championship_both_sizes (test_tournament.TournamentTests.test_full_championship_both_sizes) ... ok
+test_invalid_score_does_not_change_match (test_tournament.TournamentTests.test_invalid_score_does_not_change_match) ... ok
+test_only_supported_sizes (test_tournament.TournamentTests.test_only_supported_sizes) ... ok
+test_player_removal_preserves_unique_ids (test_tournament.TournamentTests.test_player_removal_preserves_unique_ids) ... ok
+test_points_and_tie_order (test_tournament.TournamentTests.test_points_and_tie_order) ... ok
+test_registration_validation (test_tournament.TournamentTests.test_registration_validation) ... ok
+
+----------------------------------------------------------------------
+Ran 20 tests in 7.936s
+
+OK
