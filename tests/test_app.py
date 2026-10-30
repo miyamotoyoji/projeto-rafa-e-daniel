@@ -169,6 +169,76 @@ class AppTests(unittest.TestCase):
         self.assertEqual(result.exit_code, 0)
         self.assertEqual(self.post("/organizador/entrar", {"username": "rafa", "password": "nova-senha-segura"}).status_code, 302)
 
+    def make_account(self, client, username="jogador1", password="senha-longa-de-teste"):
+        return self.post("/conta/criar", {"username": username, "display_name": "Jogador Um",
+                                          "password": password, "password_confirm": password}, client)
+
+    def test_accounts_are_stored_separately_and_hashed(self):
+        a, b = self.app.test_client(), self.app.test_client()
+        self.assertEqual(self.make_account(a, "alice").status_code, 302)
+        self.assertEqual(self.make_account(b, "bruno").status_code, 302)
+        with storage.transaction(self.dbpath) as db:
+            rows = db.execute("SELECT username, password_hash FROM user ORDER BY id").fetchall()
+        self.assertEqual([r["username"] for r in rows], ["alice", "bruno"])
+        self.assertTrue(all("senha-longa-de-teste" not in r["password_hash"] for r in rows))
+        self.assertIn(b"@alice", a.get("/conta").data)
+        self.assertIn(b"@bruno", b.get("/conta").data)
+
+    def test_account_validation_and_duplicate_username(self):
+        self.assertEqual(self.make_account(self.client).status_code, 302)
+        other = self.app.test_client()
+        self.assertEqual(self.make_account(other, "JOGADOR1").status_code, 400)
+        self.assertEqual(self.make_account(other, "ab").status_code, 400)
+        self.assertEqual(self.make_account(other, "novo", "curta").status_code, 400)
+        mismatch = self.post("/conta/criar", {"username": "novo", "display_name": "Novo",
+                                              "password": "senha-longa-de-teste",
+                                              "password_confirm": "outra-senha-longa"}, other)
+        self.assertEqual(mismatch.status_code, 400)
+        with storage.transaction(self.dbpath) as db:
+            self.assertEqual(db.execute("SELECT COUNT(*) FROM user").fetchone()[0], 1)
+
+    def test_account_login_logout_and_rate_limit(self):
+        self.make_account(self.client)
+        self.post("/conta/sair", {})
+        self.assertEqual(self.client.get("/conta").status_code, 302)
+        self.assertEqual(self.post("/conta/entrar", {"username": "jogador1", "password": "errada"}).status_code, 401)
+        self.assertEqual(self.post("/conta/entrar", {"username": "naoexiste", "password": "x"}).status_code, 401)
+        ok = self.post("/conta/entrar", {"username": "JOGADOR1", "password": "senha-longa-de-teste"})
+        self.assertEqual(ok.status_code, 302)
+        self.assertEqual(self.client.get("/conta").status_code, 200)
+        self.post("/conta/sair", {})
+        for _ in range(5):
+            self.post("/conta/entrar", {"username": "jogador1", "password": "errada"})
+        self.assertEqual(self.post("/conta/entrar", {"username": "jogador1",
+                                                     "password": "senha-longa-de-teste"}).status_code, 429)
+
+    def test_registration_links_to_account_and_blocks_second_entry(self):
+        self.create_tournament()
+        player = self.app.test_client()
+        self.make_account(player)
+        data = {"name": "Jogador Um", "riot_id": "Jogador1#BR1", "rank": "Ouro"}
+        self.assertEqual(self.post("/inscricao", data, player).status_code, 302)
+        self.assertIsNotNone(self.read()["players"][0]["user_id"])
+        again = self.post("/inscricao", {**data, "riot_id": "Jogador2#BR1"}, player)
+        self.assertEqual(again.status_code, 400)
+        self.assertEqual(len(self.read()["players"]), 1)
+        page = player.get("/conta").data
+        self.assertIn(b"Jogador1#BR1", page)
+        self.assertNotIn(b"Jogador1#BR1", self.app.test_client().get("/inscricao").data)
+
+    def test_anonymous_registration_still_works_and_account_is_private(self):
+        self.create_tournament()
+        anon = self.app.test_client()
+        self.assertEqual(self.post("/inscricao", {"name": "Anon", "riot_id": "Anon#BR1", "rank": "Ferro"}, anon).status_code, 302)
+        self.assertIsNone(self.read()["players"][0]["user_id"])
+        self.assertEqual(anon.get("/conta").status_code, 302)
+        self.assertEqual(self.post("/conta/sair", {}, anon).status_code, 403)
+
+    def test_user_session_is_not_organizer(self):
+        self.make_account(self.client)
+        self.assertEqual(self.client.get("/organizador").status_code, 302)
+        self.assertEqual(self.post("/organizador/acao", {"action": "create"}).status_code, 403)
+
 
 if __name__ == "__main__":
     unittest.main()

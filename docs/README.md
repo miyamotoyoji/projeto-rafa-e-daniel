@@ -14,6 +14,7 @@ Projeto final de Modelagem de Software, semestre 2026-2, turma 04G. Tema: organi
 - [ADR 001 — Monólito Flask](adr/001-monolito-flask.md).
 - [ADR 002 — SQLite e agregado JSON](adr/002-sqlite-agregado.md).
 - [ADR 003 — Acesso de organização](adr/003-acesso-organizador.md).
+- [ADR 005 — Contas de usuário opcionais](adr/005-contas-de-usuario.md).
 - [ADR 004 — Sem IA no produto](adr/004-sem-ia-no-produto.md).
 - [Revisão multidimensional](review/README.md): arquitetura, performance, segurança e observabilidade.
 - [Segurança e SSDLC](SEGURANCA.md).

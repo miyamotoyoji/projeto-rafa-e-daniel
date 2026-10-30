@@ -15,6 +15,8 @@
   <div class="header-inner">
     <a class="wordmark" href="{{ url_for('home') }}" aria-label="DOIS — início">DOIS<span class="wordmark-slash" aria-hidden="true">/</span></a>
     <span class="game-label">VALORANT <span>2 CONTRA 2</span></span>
+    {% if current_user %}<a class="organizer-link account-link {% if request.endpoint == 'account' %}current{% endif %}" href="{{ url_for('account') }}">{{ current_user.display_name }}</a>
+    {% else %}<a class="organizer-link account-link {% if request.endpoint in ['user_login','user_signup'] %}current{% endif %}" href="{{ url_for('user_login') }}">Entrar</a>{% endif %}
     <a class="organizer-link {% if request.endpoint in ['admin','login'] %}current{% endif %}" href="{{ url_for('admin') }}">Organização</a>
   </div>
 </header>

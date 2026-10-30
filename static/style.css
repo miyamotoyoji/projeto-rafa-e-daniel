@@ -31,7 +31,7 @@ small { font-size: .8125rem; }
 .wordmark-slash { color: var(--red); margin-left: 5px; }
 .game-label { border-left: 1px solid var(--line); padding-left: 28px; font-size: .875rem; font-weight: 700; letter-spacing: .075em; }
 .game-label span { display: block; font-size: .75rem; color: var(--muted); font-weight: 400; letter-spacing: .11em; }
-.organizer-link { margin-left: auto; font-size: .875rem; border-bottom: 1px solid transparent; padding: 6px 0; }
+.organizer-link { margin-left: 20px; font-size: .875rem; border-bottom: 1px solid transparent; padding: 6px 0; }
 .organizer-link:hover, .organizer-link.current { border-color: var(--red); }
 .nav-shell { border-bottom: 1px solid var(--line); }
 .main-nav { max-width: 1344px; padding: 0 48px; margin: auto; display: flex; gap: 32px; overflow-x: auto; scrollbar-width: thin; }
@@ -282,3 +282,6 @@ legend { font-size: .875rem; font-weight: 700; margin-bottom: 12px; }
   html { scroll-behavior: auto; }
   *, *::before, *::after { transition: none !important; }
 }
+
+.account-link { margin-left: auto; }
+.account-link + .organizer-link { margin-left: 20px; }

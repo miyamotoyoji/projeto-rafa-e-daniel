@@ -3,6 +3,7 @@ from datetime import timedelta
 from functools import wraps
 import hmac
 import os
+import re
 from pathlib import Path
 import secrets
 import sqlite3
@@ -14,6 +15,8 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 import storage
 import tournament as rules
+
+DUMMY_HASH = generate_password_hash("sem-usuario")
 
 
 def create_app(test_config=None):
@@ -63,6 +66,27 @@ def create_app(test_config=None):
         finally:
             db.close()
 
+    def current_user():
+        user_id = session.get("user")
+        if not isinstance(user_id, int):
+            return None
+        db = storage.connect(app.config["DATABASE"])
+        try:
+            return db.execute("SELECT id, username, display_name FROM user WHERE id = ?",
+                              (user_id,)).fetchone()
+        finally:
+            db.close()
+
+    def user_required(fn):
+        @wraps(fn)
+        def wrapper(*args, **kwargs):
+            if not current_user():
+                if request.method == "POST":
+                    abort(403)
+                return redirect(url_for("user_login"))
+            return fn(*args, **kwargs)
+        return wrapper
+
     def protected(fn):
         @wraps(fn)
         def wrapper(*args, **kwargs):
@@ -98,7 +122,7 @@ def create_app(test_config=None):
     @app.context_processor
     def helpers():
         return {"csrf_token": csrf_token, "ranks": rules.RANKS,
-                "phases": rules.PHASES, "organizer": is_organizer(),
+                "phases": rules.PHASES, "organizer": is_organizer(), "current_user": current_user(),
                 "team_name": lambda s, ident: next((t["name"] for t in s["teams"] if t["id"] == ident), "A definir"),
                 "team_members": lambda s, ident: " / ".join(
                     p["name"] for t in s["teams"] if t["id"] == ident for p in t["players"])}
@@ -120,14 +144,16 @@ def create_app(test_config=None):
                     s = storage.read(db)
                     if not s:
                         raise rules.RuleError("O organizador ainda não abriu as inscrições.")
+                    user = current_user()
                     rules.register(s, request.form.get("name", ""), request.form.get("riot_id", ""),
-                                   request.form.get("rank", ""))
+                                   request.form.get("rank", ""), user["id"] if user else None)
                     storage.save(db, s)
                 flash("Inscrição confirmada. Acompanhe aqui o sorteio da sua dupla.", "success")
                 return redirect(url_for("signup"))
             except rules.RuleError as error:
                 return render("signup", error=str(error), values=request.form), 400
-        return render("signup", values={})
+        user = current_user()
+        return render("signup", values={"name": user["display_name"]} if user else {})
 
     @app.get("/duplas")
     def teams():
@@ -141,6 +167,91 @@ def create_app(test_config=None):
     def bracket():
         return render("bracket")
 
+    def throttled(db, key, now):
+        """Cinco falhas por endereço e tipo de login em 15 minutos (RNF05, RNF10)."""
+        db.execute("DELETE FROM login_attempt WHERE started < ?", (now - 900,))
+        attempt = db.execute("SELECT failures FROM login_attempt WHERE address = ?", (key,)).fetchone()
+        return bool(attempt and attempt["failures"] >= 5)
+
+    def register_failure(db, key, now):
+        db.execute("INSERT INTO login_attempt (address, failures, started) VALUES (?, 1, ?) "
+                   "ON CONFLICT(address) DO UPDATE SET failures = failures + 1", (key, now))
+
+    @app.route("/conta/criar", methods=["GET", "POST"])
+    def user_signup():
+        if current_user():
+            return redirect(url_for("account"))
+        if request.method == "POST":
+            username = request.form.get("username", "").strip()
+            display_name = request.form.get("display_name", "").strip()
+            password = request.form.get("password", "")
+            error = None
+            if not re.fullmatch(r"[A-Za-z0-9_.-]{3,30}", username):
+                error = "Usuário com 3 a 30 letras, números, ponto, hífen ou sublinhado."
+            elif not 2 <= len(display_name) <= 40:
+                error = "Informe um nome com 2 a 40 caracteres."
+            elif not 12 <= len(password) <= 1024:
+                error = "A senha precisa ter de 12 a 1024 caracteres."
+            elif password != request.form.get("password_confirm", ""):
+                error = "As senhas não coincidem."
+            if not error:
+                try:
+                    with storage.transaction(app.config["DATABASE"]) as db:
+                        cursor = db.execute(
+                            "INSERT INTO user (username, display_name, password_hash, created) VALUES (?, ?, ?, ?)",
+                            (username, display_name, generate_password_hash(password), time.time()))
+                        user_id = cursor.lastrowid
+                except sqlite3.IntegrityError:
+                    error = "Este usuário já existe. Escolha outro."
+            if error:
+                return render("user_signup", error=error, values=request.form), 400
+            session.clear()
+            session["user"] = user_id
+            session.permanent = True
+            flash("Conta criada. Você já pode se inscrever no campeonato.", "success")
+            return redirect(url_for("account"))
+        return render("user_signup", values={})
+
+    @app.route("/conta/entrar", methods=["GET", "POST"])
+    def user_login():
+        if current_user():
+            return redirect(url_for("account"))
+        if request.method == "POST":
+            key = "user:" + (request.remote_addr or "unknown")
+            now = time.time()
+            with storage.transaction(app.config["DATABASE"]) as db:
+                if throttled(db, key, now):
+                    return render("user_login", error="Muitas tentativas. Aguarde 15 minutos e tente novamente."), 429
+                row = db.execute("SELECT * FROM user WHERE username = ?",
+                                 (request.form.get("username", "").strip(),)).fetchone()
+                # Sempre verifica um hash para não revelar se o usuário existe pelo tempo de resposta.
+                valid = check_password_hash(row["password_hash"] if row else DUMMY_HASH,
+                                            request.form.get("password", "")[:1024]) and bool(row)
+                if valid:
+                    db.execute("DELETE FROM login_attempt WHERE address = ?", (key,))
+                    session.clear()
+                    session["user"] = row["id"]
+                    session.permanent = True
+                    return redirect(url_for("account"))
+                register_failure(db, key, now)
+            return render("user_login", error="Usuário ou senha incorretos."), 401
+        return render("user_login")
+
+    @app.post("/conta/sair")
+    @user_required
+    def user_logout():
+        session.clear()
+        return redirect(url_for("home"))
+
+    @app.get("/conta")
+    @user_required
+    def account():
+        s = state()
+        user = current_user()
+        player = next((p for p in (s["players"] if s else []) if p.get("user_id") == user["id"]), None)
+        team = next((t for t in (s["teams"] if s else []) if player and any(m["id"] == player["id"] for m in t["players"])), None)
+        return render("account", player=player, team=team)
+
     @app.route("/organizador/entrar", methods=["GET", "POST"])
     def login():
         if is_organizer():
@@ -150,9 +261,7 @@ def create_app(test_config=None):
             now = time.time()
             error = "Usuário ou senha incorretos."
             with storage.transaction(app.config["DATABASE"]) as db:
-                db.execute("DELETE FROM login_attempt WHERE started < ?", (now - 900,))
-                attempt = db.execute("SELECT * FROM login_attempt WHERE address = ?", (address,)).fetchone()
-                if attempt and attempt["failures"] >= 5:
+                if throttled(db, address, now):
                     return render("login", error="Muitas tentativas. Aguarde 15 minutos e tente novamente."), 429
                 admin_row = db.execute("SELECT * FROM organizer WHERE id = 1").fetchone()
                 valid = bool(admin_row and check_password_hash(
@@ -163,8 +272,7 @@ def create_app(test_config=None):
                     session["organizer"] = admin_row["version"]
                     session.permanent = True
                     return redirect(url_for("admin"))
-                db.execute("INSERT INTO login_attempt (address, failures, started) VALUES (?, 1, ?) "
-                           "ON CONFLICT(address) DO UPDATE SET failures = failures + 1", (address, now))
+                register_failure(db, address, now)
             return render("login", error=error), 401
         return render("login")
 

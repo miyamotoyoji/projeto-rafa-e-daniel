@@ -14,6 +14,13 @@ CREATE TABLE IF NOT EXISTS organizer (
     password_hash TEXT NOT NULL,
     version TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS user (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL UNIQUE COLLATE NOCASE,
+    display_name TEXT NOT NULL,
+    password_hash TEXT NOT NULL,
+    created REAL NOT NULL
+);
 CREATE TABLE IF NOT EXISTS login_attempt (
     address TEXT PRIMARY KEY,
     failures INTEGER NOT NULL,

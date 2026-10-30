@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import heading, empty, csrf with context %}
+{% block title %}Minha conta{% endblock %}
+{% block content %}
+{{ heading('MINHA CONTA', current_user.display_name, '@' ~ current_user.username) }}
+<div class="workspace-grid">
+<section>
+{% if player %}
+  <h2>Sua inscrição</h2>
+  <ul class="player-list">
+    <li><strong>{{ player.name }}</strong><span class="rank-text">{{ player.rank }}</span></li>
+    <li><span>Riot ID</span><strong>{{ player.riot_id }}</strong></li>
+  </ul>
+  {% if team %}
+  <h2>Sua dupla</h2>
+  <p><strong>{{ team.name }}</strong>: {{ team_members(s, team.id) }}</p>
+  <a class="button button-outline" href="{{ url_for('groups') }}">Ver grupos</a>
+  {% else %}
+  <p class="field-help">O sorteio das duplas ainda não aconteceu.</p>
+  {% endif %}
+{% elif not s %}
+  {{ empty('Sem campeonato', 'O organizador ainda não abriu um campeonato.') }}
+{% else %}
+  {{ empty('Sem inscrição', 'Sua conta ainda não está inscrita neste campeonato.') }}
+  {% if s.phase == 'registration' %}<a class="button" href="{{ url_for('signup') }}">Inscrever-se</a>{% endif %}
+{% endif %}
+</section>
+<aside class="side-panel">
+  <form method="post" action="{{ url_for('user_logout') }}">{{ csrf() }}<button class="button button-outline" type="submit">Sair</button></form>
+</aside>
+</div>
+{% endblock %}

@@ -24,7 +24,7 @@ Personas de projeto, ainda não validadas por entrevistas; não representam pess
 | Participante da comunidade | Inscrever-se rapidamente e consultar confrontos pelo celular; não quer criar outra conta | Informar nome, Riot ID e rank; consultar nomes, ranks, duplas e resultados; não alterar resultados nem ver os Riot IDs alheios |
 | Organizador voluntário | Conferir inscrições, equilibrar duplas e controlar fases sem planilhas manuais | Autenticar-se; criar campeonato; consultar Riot IDs; remover inscrição antes do sorteio; sortear; corrigir a fase atual; confirmar avanços |
 
-Visitantes compartilham as permissões públicas do participante. A ausência de conta de jogador é intencional; os dois perfis possuem permissões diferentes, mas só o organizador se autentica.
+Visitantes compartilham as permissões públicas do participante. A conta de jogador é opcional ([ADR 005](docs/adr/005-contas-de-usuario.md)): quem não a cria continua se inscrevendo normalmente; usuários autenticados apenas acompanham a própria inscrição e não ganham permissões de organização.
 
 ## 3. Regras de negócio
 
@@ -77,7 +77,13 @@ Convenção em português baseada no [guia do autor de EARS, Alistair Mavin](htt
 | RNF05 | Indesejado | Se um endereço atingir cinco falhas de login na janela de 15 minutos, então o DOIS deverá rejeitar novas tentativas até a expiração dessa janela. |
 | RNF06 | Evento | Quando a credencial do organizador for substituída, o DOIS deverá invalidar as sessões baseadas na versão anterior. |
 | RNF07 | Ubíquo | O DOIS deverá apresentar interface em português do Brasil legível entre 320 e 1440 pixels, com rolagem localizada quando tabelas e chaveamento excederem a largura disponível. |
+| RF21 | Evento | Quando um visitante enviar usuário, nome e senha válidos e o usuário ainda não existir, o DOIS deverá criar a conta e iniciar sua sessão. |
+| RF22 | Indesejado | Se o usuário já existir (sem distinção de maiúsculas), a senha for curta ou as senhas não coincidirem, então o DOIS deverá recusar o cadastro sem criar conta. |
+| RF23 | Evento | Quando um usuário autenticado se inscrever, o DOIS deverá vincular a inscrição à conta e recusar uma segunda inscrição da mesma conta; visitantes sem conta continuam podendo se inscrever. |
+| RF24 | Evento | Quando um usuário autenticado consultar sua conta, o DOIS deverá exibir apenas a própria inscrição, incluindo Riot ID e dupla sorteada. |
 | RNF08 | Ubíquo | O DOIS deverá renderizar dados fornecidos pelos participantes como texto, sem executar marcação HTML enviada em nomes. |
+| RNF09 | Ubíquo | O DOIS deverá armazenar senhas de usuários apenas como hash. |
+| RNF10 | Indesejado | Se um endereço atingir cinco falhas de login de usuário na janela de 15 minutos, então o DOIS deverá rejeitar novas tentativas até a expiração, sem afetar o limite do organizador. |
 
 ### Critérios de aceite observáveis
 

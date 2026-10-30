@@ -24,7 +24,7 @@ def create(name, capacity):
             "round": 0, "champion": None}
 
 
-def register(state, name, riot_id, rank):
+def register(state, name, riot_id, rank, user_id=None):
     if state["phase"] != "registration":
         raise RuleError("As inscrições estão encerradas.")
     if len(state["players"]) >= state["capacity"] * 2:
@@ -39,9 +39,11 @@ def register(state, name, riot_id, rank):
         raise RuleError("Selecione seu rank atual.")
     if any(p["riot_id"].casefold() == riot_id.casefold() for p in state["players"]):
         raise RuleError("Este Riot ID já está inscrito.")
+    if user_id is not None and any(p.get("user_id") == user_id for p in state["players"]):
+        raise RuleError("Sua conta já tem uma inscrição neste campeonato.")
     player = {"id": max((p["id"] for p in state["players"]), default=0) + 1,
               "name": name, "riot_id": riot_id, "rank": rank,
-              "level": RANKS.index(rank) + 1}
+              "level": RANKS.index(rank) + 1, "user_id": user_id}
     state["players"].append(player)
     return player
 

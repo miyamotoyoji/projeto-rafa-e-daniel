@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import heading, csrf with context %}
+{% block title %}Criar conta{% endblock %}
+{% block content %}
+{{ heading('CONTA', 'Criar conta', 'Guarde sua inscrição e acompanhe sua dupla em qualquer aparelho.') }}
+<div class="workspace-grid">
+<form method="post" class="entry-form" data-pending="Criando conta…">
+  {{ csrf() }}
+  {% if error %}<div class="notice error" role="alert">{{ error }}</div>{% endif %}
+  <label for="display_name">Nome</label><input id="display_name" name="display_name" value="{{ values.get('display_name','') }}" required minlength="2" maxlength="40" autocomplete="name">
+  <label for="username">Usuário</label><input id="username" name="username" value="{{ values.get('username','') }}" required minlength="3" maxlength="30" pattern="[A-Za-z0-9_.\-]+" autocomplete="username" spellcheck="false">
+  <label for="password">Senha</label><input id="password" type="password" name="password" required minlength="12" maxlength="1024" autocomplete="new-password" aria-describedby="pw-help">
+  <p id="pw-help" class="field-help">Mínimo de 12 caracteres.</p>
+  <label for="password_confirm">Repita a senha</label><input id="password_confirm" type="password" name="password_confirm" required minlength="12" maxlength="1024" autocomplete="new-password">
+  <button class="button" type="submit">Criar conta</button>
+</form>
+<aside class="side-panel"><p class="eyebrow">JÁ TEM CONTA?</p><h2>Entre e<br>continue.</h2><p>A conta é opcional: a inscrição continua aberta sem login.</p><a class="text-link" href="{{ url_for('user_login') }}">Entrar</a></aside>
+</div>
+{% endblock %}

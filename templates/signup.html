@@ -2,12 +2,13 @@
 {% from '_macros.html' import heading, empty, csrf with context %}
 {% block title %}Inscrição{% endblock %}
 {% block content %}
-{{ heading('01 / PARTICIPAR', 'Entre no campeonato', 'Sem criar conta. Sua dupla será definida no sorteio.') }}
+{{ heading('01 / PARTICIPAR', 'Entre no campeonato', 'Conta é opcional. Sua dupla será definida no sorteio.') }}
 <div class="workspace-grid">
 <section>
 {% if s and s.phase == 'registration' and s.players|length < s.capacity * 2 %}
   <form method="post" class="entry-form" data-pending="Enviando inscrição…">
     {{ csrf() }}
+    {% if current_user %}<p class="field-help">Inscrevendo com a conta @{{ current_user.username }}.</p>{% else %}<p class="field-help"><a class="text-link" href="{{ url_for('user_login') }}">Entre</a> ou <a class="text-link" href="{{ url_for('user_signup') }}">crie uma conta</a> para acompanhar sua inscrição, ou continue sem conta.</p>{% endif %}
     {% if error %}<div class="notice error" role="alert">{{ error }}</div>{% endif %}
     <label for="name">Seu nome</label><input id="name" name="name" value="{{ values.get('name','') }}" minlength="2" maxlength="40" required autocomplete="name" placeholder="Como você quer ser chamado">
     <label for="riot_id">Riot ID</label><input id="riot_id" name="riot_id" value="{{ values.get('riot_id','') }}" minlength="7" maxlength="22" required spellcheck="false" aria-describedby="riot-help" placeholder="SeuNome#BR1">
